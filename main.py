@@ -1,7 +1,15 @@
+from os import system
+from platform import platform
+
+from utils import green, white, red
+
 from bs4 import BeautifulSoup
 from requests import get
 import time
 import random
+
+
+
 
 url = 'https://shikimori.one/zove/list/anime'
 anime = []
@@ -25,7 +33,6 @@ if header_status_0:
             anime.extend(anime_data)
             value = random.random()
             scaled_value = 1 + (value * (9 - 5))
-            print(scaled_value)
             time.sleep(scaled_value)
     else:
         print('Таблица не найдена после заголовка status-0')
@@ -42,3 +49,57 @@ while count <= n:  # count <= n
     name = info.find('span', {"class": "name-ru"}).text
     print(index, ' ', name)
     count += 1
+
+while True:
+    system("cls" if platform().startswith("Windows") else "clear")
+    # Header
+    anime_length = len(anime)
+
+    if len(anime):
+        header = (
+            f"Запланированно аниме: {anime_length}"
+        )
+
+    print(header)
+
+    for i, name in enumerate([
+        "Выбрать рандомное аниме",
+        "Удалить последнее занятие",
+        "Изменить время последнего занятия",
+        "Добавить подпись к последнему занятию"
+    ]):
+        print(f"{green}{'edci'[i]}{white}: {name}")
+
+    print()
+
+    # Gain input
+    session_id = input("\nВвод: ")
+    if session_id.isdigit():
+        session_id = int(session_id)
+    elif session_id in ('e', 'd', 'c', 'i'):
+        session_id = "edci".index(session_id) + 1
+    else:
+        session_id = 0
+
+
+    if session_id == 1:
+        print("Рандомное аниме:")
+
+        random_index = random.randint(0, n)
+        info = anime[int(random_index)]
+
+        a_url_anime = info.find('a', class_='tooltipped')
+        url_anime = a_url_anime['href']
+        url = "https://shikimori.one" + url_anime
+        link_text = "Ссылка на аниме"
+        print(f"{link_text}: {url}")
+
+        response = get(url, headers=headers)
+        html_soup = BeautifulSoup(response.text, 'html.parser')
+
+        anime_block = html_soup.find("div", class_="block")
+
+        index = info.find('td', class_='index').text
+        name = info.find('span', {"class": "name-ru"}).text
+        print(index, ' ', name)
+        input(f"\n{red}Действие отменено{white}")
